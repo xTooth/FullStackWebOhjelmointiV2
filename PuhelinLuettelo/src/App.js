@@ -8,8 +8,9 @@ const App = () => {
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filter, setFilter] = useState('')
-  const [message, setMessage] =useState(null)
-  const [errorMessage, setErrorMessage] = useState(null)
+  const [message, setMessage] = useState(null)
+  const [mStyle, setMStyle] = useState(message)
+
   const hook = () => {
     PersonService.getAll()
       .then(response => {
@@ -18,33 +19,36 @@ const App = () => {
       })
   }
 
-  const Notification = ({ message }) => {
+  const Notification = ({ message, style }) => {
+
     if (message === null) {
       return null
     }
-  
+
     return (
-      <div className="success">
+      <div className={style}>
         {message}
       </div>
     )
   }
-  const NotificationE = ({ message }) => {
-    if (message === null) {
-      return null
-    }
-  
-    return (
-      <div className="error">
-        {message}
-      </div>
-    )
-  }
+
   useEffect(hook, [])
 
   const rem = (props) => {
     console.log(props)
-    PersonService.delete(props).then(res => { hook() })
+
+    PersonService.delete(props)
+      .then(res => { hook() })
+      .then(res => {
+        setMStyle('message')
+        setMessage(`${props.value.name} poistettiin`)
+        setTimeout(() => { setMessage(null) }, 5000)
+      })
+      .catch(error => {
+        setMStyle('error')
+        setMessage(`${props.value.name} on jo poistettu`)
+        setTimeout(() => { setMessage(null) }, 5000)
+      }).then(res => { hook() })
   }
 
   const addName = (event) => {
@@ -55,15 +59,32 @@ const App = () => {
       number: newNumber
     }
 
-    
-    if (persons.filter(per => per.name === person.name).length > 0) {
-      alert(`person ${newName} is already on the list`)
-      setNewName('')
-      setNewNumber('')
+
+
+    const doesExist = persons.find(i => i.name === person.name);
+    setNewName('')
+    setNewNumber('')
+    if (doesExist !== undefined) {
+      if (window.confirm(`${person.name} on jo listalla, korvataanko numero uudella?`)) {
+        PersonService.update(doesExist.id, person)
+          .then(res => { hook() })
+          .then(res => {
+            setMStyle('message')
+            setMessage(`${person.name} muutettiin`)
+            setTimeout(() => { setMessage(null) }, 5000)})
+              .catch(error => {
+                setMStyle('error')
+                setMessage(`${person.name} on jo poistettu`);
+                setTimeout(() => { setMessage(null) }, 5000)
+              }).then(res => { hook() })
+          }
+        
+
     } else {
       setNewName('')
       setNewNumber('')
       PersonService.create(person).then(res => { hook() })
+      setMStyle('message')
       setMessage(
         `Henkilö '${person.name}' lisätty onnistuneesti`
       )
@@ -90,8 +111,8 @@ const App = () => {
 
   return (
     <div>
-      <Notification message={message}/>
-      <NotificationE message={errorMessage} />
+      <Notification message={message} style={mStyle} />
+
       <h2>Puhelinluettelo</h2>
       <form>
         rajaa näytettävät: <input value={filter} onChange={handleFilter} />

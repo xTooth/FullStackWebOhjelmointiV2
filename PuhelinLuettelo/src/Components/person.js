@@ -5,7 +5,7 @@ const Person = (props) => {
  // console.log(props.value.id, props.persons)  
   return (
       <>
-        <li>{props.value.name} {props.value.number} <button onClick={() => {props.rem(props.value.id)}}>poista</button></li>
+        <li>{props.value.name} {props.value.number} <button onClick={() => {props.rem(props)}}>poista</button></li>
       </>
     )
   }

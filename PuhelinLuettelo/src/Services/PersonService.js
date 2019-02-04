@@ -12,11 +12,11 @@ const create = newObject => {
 const update = (id, newObject) => {
     return axios.put(`${baseUrl}/${id}`, newObject)
 }
-const del = (id) => {
+const del = (props) => {
     if (window.confirm('Haluatko varmasi poistaa')) {
-        console.log(id)
+        console.log(props.value.id)
 
-        return axios.delete(`${baseUrl}/${id}`)
+        return axios.delete(`${baseUrl}/${props.value.id}`)
 
     }
 
