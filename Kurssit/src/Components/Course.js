@@ -31,7 +31,7 @@ const Content = (props) => {
     )
     return (
         <div>
-            {rows()}
+            {rows}
         </div>
     )
 }
